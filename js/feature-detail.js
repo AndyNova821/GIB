@@ -224,6 +224,12 @@ export function closePaywallModal() {
     document.body.style.overflow = ''; 
 }
 export function openAuthModal() { 
+    // モーダルを開くたびに表示状態をリセットする
+    const formContainer = document.getElementById('auth-form-container');
+    const successMsg = document.getElementById('auth-success-msg');
+    if (formContainer) formContainer.style.display = 'block';
+    if (successMsg) successMsg.style.display = 'none';
+
     document.getElementById('auth-modal').style.display = 'block'; 
     document.body.style.overflow = 'hidden'; 
 }

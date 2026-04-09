@@ -106,9 +106,15 @@ export async function handleAuth(action) {
                 showToast("このメールアドレスは既に登録されています。ログインしてください。", "error");
                 return; 
             }
-            showToast("登録確認メールを送信しました！メール内のリンクをクリックしてください。", "success");
-            closeAuthModal();
-        } 
+            
+            // ★ 修正: モーダルを閉じずに、フォームを隠して完了メッセージを表示する
+            const formContainer = document.getElementById('auth-form-container');
+            const successMsg = document.getElementById('auth-success-msg');
+            if (formContainer) formContainer.style.display = 'none';
+            if (successMsg) successMsg.style.display = 'block';
+            
+            // showToastは不要になるため削除（または控えめなメッセージに変更）
+        }
         else if (action === 'login') {
             const authPromise = supabase.auth.signInWithPassword({
                 email: email,

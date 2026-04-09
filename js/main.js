@@ -1,11 +1,10 @@
 // js/main.js
-import { JST_TODAY } from './core.js';
+import { JST_TODAY, showToast } from './core.js';
 import { updateDashboardUI } from './feature-timeline.js';
 import { renderWatchlist, updatePinIcons } from './feature-watchlist.js';
 import { renderArchives } from './feature-archive.js';
 import './feature-detail.js';
-import './supabase-auth.js';
-import { supabase } from './supabase-auth.js';
+import { supabase, updateAuthUI } from './supabase-auth.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     // ==========================================
@@ -38,10 +37,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     .eq('id', session.user.id)
                     .single();
 
-                // プランが free 以外に更新されたら即リロード！
+                // ★ 修正: プランが free 以外に更新されたらリロードせずにUIを直接書き換える
                 if (data && data.plan !== 'free') {
                     clearInterval(checkInterval);
-                    window.location.reload();
+                    
+                    // 1. ローカルストレージを最新プランに更新
+                    localStorage.setItem('gib_user_plan', data.plan);
+                    
+                    // 2. ヘッダーのバッジとリストの鍵アイコンを更新（ここで鍵が外れる）
+                    updateAuthUI();
+                    updatePinIcons();
+                    
+                    // 3. ローディング画面をフェードアウト
+                    if (loadingOverlay) {
+                        loadingOverlay.classList.remove('active');
+                        setTimeout(() => loadingOverlay.style.display = 'none', 300);
+                    }
+                    
+                    // 4. 完了を知らせるトースト表示
+                    let planName = data.plan === 'pro' ? 'プロ' : 'スタンダード';
+                    showToast(`✨ ${planName}プランへのアップグレードが完了しました！`, 'success');
+
                 } else if (attempts >= maxAttempts) {
                     // タイムアウト時は一旦リロードしてユーザーに委ねる
                     clearInterval(checkInterval);

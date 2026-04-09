@@ -312,10 +312,22 @@
     <div id="auth-modal" class="menu-overlay" style="display: none; opacity: 1; z-index: 2000;">
         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--surface-color); padding: 25px; border-radius: 8px; border: 1px solid var(--accent-color); width: 90%; max-width: 350px;" onclick="event.stopPropagation()">
             <h3 style="color: var(--accent-color); margin-bottom: 15px; text-align: center;">GIB 認証システム</h3>
-            <input type="email" id="auth-email" placeholder="メールアドレス" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: white;">
-            <input type="password" id="auth-password" placeholder="パスワード" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: white;">
-            <button onclick="handleAuth('login')" style="width: 100%; padding: 10px; background: var(--accent-color); color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">ログイン</button>
-            <button onclick="handleAuth('signup')" style="width: 100%; padding: 10px; background: transparent; color: var(--accent-color); border: 1px solid var(--accent-color); border-radius: 4px; font-weight: bold; cursor: pointer;">新規登録</button>
+            
+            <div id="auth-form-container">
+                <input type="email" id="auth-email" placeholder="メールアドレス" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: white;">
+                <input type="password" id="auth-password" placeholder="パスワード" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: white;">
+                <button onclick="handleAuth('login')" style="width: 100%; padding: 10px; background: var(--accent-color); color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">ログイン</button>
+                <button onclick="handleAuth('signup')" style="width: 100%; padding: 10px; background: transparent; color: var(--accent-color); border: 1px solid var(--accent-color); border-radius: 4px; font-weight: bold; cursor: pointer;">新規登録</button>
+            </div>
+
+            <div id="auth-success-msg" style="display: none; text-align: center; padding: 10px 0;">
+                <p style="color: #58a6ff; font-weight: bold; margin-bottom: 10px;">✅ 仮登録が完了しました</p>
+                <p style="font-size: 0.9rem; color: var(--text-primary); line-height: 1.5; margin-bottom: 15px;">
+                    ご入力いただいたメールアドレスに<br>認証リンクを送信しました。<br><br>
+                    メール内のリンクをクリックして、<br>アカウントを有効化してください。
+                </p>
+            </div>
+
             <div style="text-align: right; margin-top: 15px;"><button onclick="closeAuthModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer;">閉じる ×</button></div>
         </div>
     </div>
