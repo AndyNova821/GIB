@@ -23,21 +23,37 @@ export async function updateDashboardUI() {
     await Promise.all(targetIds.map(async (targetId) => {
         const dateElements = document.querySelectorAll(`[data-target="${targetId}"]:not(.archived) .update-date`);
         try {
-            const response = await fetch(`${folderPath}/${targetId}_${AppState.TARGET_DATE}.json`, { method: 'HEAD' });
-            if (response.ok) {
+            // ★ HEADではなくGETで中身を取得するように変更
+            const response = await fetch(`${folderPath}/${targetId}_${AppState.TARGET_DATE}.json`);
+            if (!response.ok) throw new Error('Not Found');
+
+            const data = await response.json();
+            let isValid = false;
+
+            // ★ データの実効性チェック
+            if (targetId === 'all') {
+                // 全体要約：summaryキーが存在し、かつ空文字でないか
+                isValid = !!(data && data.summary && data.summary.trim() !== "");
+            } else {
+                // 各地域：factions内にその地域のデータが存在するか
+                isValid = !!(data && data.factions && data.factions[targetId]);
+            }
+
+            if (isValid) {
                 dateElements.forEach(el => {
                     el.textContent = `更新: ${formattedDate}`;
                     el.className = isToday ? "update-date is-today" : "update-date is-past";
-                    delete el.dataset.status; // ★ 成功時はデータ属性を削除（リセット）
+                    delete el.dataset.status;
                 });
             } else {
-                throw new Error('Not Found');
+                // ファイルはあっても中身が空ならエラー扱いにする
+                throw new Error('Empty Content');
             }
         } catch (error) {
             dateElements.forEach(el => {
                 el.textContent = "データ未取得";
                 el.className = "update-date is-missing";
-                el.dataset.status = "missing"; // ★ 失敗時にデータ属性を付与
+                el.dataset.status = "missing"; // ★ これにより詳細画面への遷移がブロックされます
             });
         }
     }));
