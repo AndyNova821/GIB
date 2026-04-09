@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>世界情勢情報局 | Geopolitical Intelligence Bureau</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/features.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="bg-watermark">GIB</div>
+
+    <header>
+        <div class="logo-container">
+            <h1 class="logo-ja">世界情勢情報局</h1>
+            <span class="logo-en">Geopolitical Intelligence Bureau</span>
+        </div>
+        <div id="auth-status-badge" onclick="handleBadgeClick()" style="cursor: pointer; font-size: 0.75rem; padding: 4px 8px; border-radius: 4px; font-family: monospace; border: 1px solid var(--border-color); color: var(--text-secondary); margin-right: 15px; margin-left: auto; transition: opacity 0.2s;" onmouseover="this.style.opacity=0.7" onmouseout="this.style.opacity=1">[未ログイン]</div>        <div class="menu-icon" onclick="toggleMenu()" role="button" tabindex="0" aria-label="メニューを開く">≡</div> 
+    </header>
+
+    <div id="menu-overlay" class="menu-overlay" onclick="toggleMenu()"></div>
+    <nav id="side-menu" class="side-menu">
+        <div class="menu-header">
+            <span>GIB System Menu</span>
+            <span class="close-menu" onclick="toggleMenu()" role="button" tabindex="0" aria-label="メニューを閉じる">×</span>
+        </div>
+        <ul class="menu-list">
+            <li onclick="openAuthModal()" role="button" tabindex="0" id="menu-auth-btn">🔑 ログイン / 新規登録</li>
+
+            <li onclick="openAccountInfo()" role="button" tabindex="0" id="menu-account-btn" style="display: none;">👤 アカウント情報</li>
+            
+            <li onclick="openArchiveView()" role="button" tabindex="0">📂 情報アーカイブ倉庫</li>
+            
+            <li onclick="showToast('現在作成中です。次回アップデートをお待ちください！', 'success')" role="button" tabindex="0">📖 使い方・見方ガイド</li>
+            <li onclick="showToast('システム環境設定は現在開発中です。', 'success')" role="button" tabindex="0">⚙️ システム環境設定</li>
+            <li onclick="showToast('他言語パックは今後のアップデートで追加予定です。', 'success')" role="button" tabindex="0">🌐 言語設定 (JP)</li>
+            <li onclick="openProfile()" role="button" tabindex="0">👤 開発者プロフィール</li>
+            <li onclick="handleLogout()" role="button" tabindex="0" id="menu-logout-btn" style="display: none; color: #ff7b72;">🚪 ログアウト</li>
+        </ul>
+    </nav>
+
+    <div id="profile-modal" class="profile-modal view">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeProfile()" role="button" tabindex="0">← 戻る</button>
+            <h2>開発者プロフィール</h2>
+        </div>
+        <div class="detail-content matrix-content">
+            <h3>全ては「偏りのない真実」の為に。</h3>
+            <p>今の時代、情報の透明性と正確性はますます重要になっています。<br>偏見や誤解を排除し、読者に信頼できる情報を提供することを使命としています。</p>
+            <p>GIBは世界中の様々な情報源からデータを収集し、当方で作成したAI技術を駆使して世界のリアルな情報を収集し、深く分析して要約することで、ユーザーが迅速かつ正確に世界情勢を把握できるように設計されています。</p>
+            <p>GIBの目標は、ユーザーが日々のニュースや出来事をより深く理解し、偏りのない真実の情報に基づいた判断を下せるよう支援することです。これからもより良いサービスを提供できるよう努めてまいります。</p>
+        </div>
+    </div>
+
+    <div id="account-modal" class="profile-modal view">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeAccountInfo()" role="button" tabindex="0">← 戻る</button>
+            <h2 style="margin: 0;">アカウント情報</h2>
+        </div>
+        <div class="detail-content matrix-content">
+            <div id="account-info-content" style="background: var(--surface-color); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
+                <p>ユーザー情報を読み込んでいます...</p>
+            </div>
+            
+            <div style="margin-top: 25px;">
+                <h3 style="color: #58a6ff; font-size: 1rem; margin-bottom: 10px;">サブスクリプション管理</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 15px;">プランの変更（アップグレード・ダウングレード）や解約はこちらから行えます。</p>
+                <button onclick="openPaywallModal('現在のプラン確認・変更')" class="clip-btn" style="width: 100%; padding: 12px; text-align: center; font-weight: bold; margin-bottom: 10px; display: block;">👑 プランの確認・変更</button>
+
+                <button onclick="openCustomerPortal()" id="btn-customer-portal" class="clip-btn" style="width: 100%; padding: 12px; text-align: center; border-color: var(--border-color); color: var(--text-primary); display: none;">💳 お支払い設定・プラン解約</button>
+            </div>
+
+            <div style="margin-top: 40px; text-align: center; border-top: 1px dashed var(--border-color); padding-top: 20px;">
+                <p style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 10px;">GIBシステムから完全にデータを削除します。</p>
+                <button onclick="handleDeleteAccount()" style="background: none; border: none; color: #ff7b72; font-size: 0.85rem; cursor: pointer; text-decoration: underline;">システムから退会する (アカウント削除)</button>
+            </div>
+        </div>
+    </div>
+
+    <main id="dashboard-view" class="view active">
+        <section class="time-machine-section">
+            <div class="time-machine-controls">
+                <label for="target-date" class="date-label">📅 情報照会日 (JST):</label>
+                <input type="date" id="target-date" class="date-picker" onchange="updateTargetDate(this.value, 'calendar')">
+                <div class="quick-date-btns">
+                    <button id="btn-yesterday" class="quick-btn" onclick="setQuickDate('yesterday')" role="button" tabindex="0">昨日</button>
+                    <button id="btn-today" class="quick-btn active" onclick="setQuickDate('today')" role="button" tabindex="0">今日</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="watchlist-section" id="watchlist-section" style="display: none;">
+            <h2 class="section-title">📌 注目エリア</h2>
+            <div class="list-container" id="watchlist-container">
+                </div>
+        </section>
+
+        <section class="category-section original-list">
+            <details class="accordion" open>
+                <summary class="section-title" role="button" tabindex="0">🔥 主要国・激戦区</summary>
+                <div class="list-container">
+                    <div class="list-item" onclick="openDetail('all')" role="button" tabindex="0" data-target="all" style="border-left: 4px solid #e3b341;">
+                        <span class="pin-icon" style="visibility: hidden;">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-all">確認中...</span>
+                            <div class="item-title">
+                                <span class="flag">🌍</span>
+                                <span class="name" style="color: #e3b341; font-weight: bold;">主要国情勢トピック</span>
+                            </div>
+                        </div>
+                        <div class="item-meta"><span class="arrow">›</span></div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('us')" role="button" tabindex="0" data-target="us">
+                        <span class="pin-icon" data-id="us" onclick="togglePin(event, 'us', '🇺🇸', 'アメリカ')" role="button" tabindex="0">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-us">確認中...</span>
+                            <div class="item-title"><span class="flag">🇺🇸</span><span class="name">アメリカ</span></div>
+                        </div>
+                        <div class="item-meta"><span class="live-data" id="live-us">--</span><span class="arrow">›</span></div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('iran')" role="button" tabindex="0" data-target="iran">
+                        <span class="pin-icon" data-id="iran" onclick="togglePin(event, 'iran', '🇮🇷', 'イラン')" role="button" tabindex="0">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-iran">確認中...</span>
+                            <div class="item-title"><span class="flag">🇮🇷</span><span class="name">イラン</span></div>
+                        </div>
+                        <div class="item-meta"><span class="live-data" id="live-iran">--</span><span class="arrow">›</span></div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('jp')" role="button" tabindex="0" data-target="jp">
+                        <span class="pin-icon" data-id="jp" onclick="togglePin(event, 'jp', '🇯🇵', '日本')" role="button" tabindex="0">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-jp">確認中...</span>
+                            <div class="item-title"><span class="flag">🇯🇵</span><span class="name">日本</span></div>
+                        </div>
+                        <div class="item-meta"><span class="live-data" id="live-jp">--</span><span class="arrow">›</span></div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('israel')" role="button" tabindex="0" data-target="israel">
+                        <span class="pin-icon" data-id="israel" onclick="togglePin(event, 'israel', '🇮🇱', 'イスラエル')" role="button" tabindex="0">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-israel">確認中...</span>
+                            <div class="item-title"><span class="flag">🇮🇱</span><span class="name">イスラエル</span></div>
+                        </div>
+                        <div class="item-meta"><span class="live-data" id="live-israel">--</span><span class="arrow">›</span></div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('ukraine')" role="button" tabindex="0" data-target="ukraine">
+                        <span class="pin-icon" data-id="ukraine" onclick="togglePin(event, 'ukraine', '🇺🇦', 'ウクライナ')" role="button" tabindex="0">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-ukraine">確認中...</span>
+                            <div class="item-title"><span class="flag">🇺🇦</span><span class="name">ウクライナ</span></div>
+                        </div>
+                        <div class="item-meta"><span class="live-data" id="live-ukraine">--</span><span class="arrow">›</span></div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('russia')" role="button" tabindex="0" data-target="russia">
+                        <span class="pin-icon" data-id="russia" onclick="togglePin(event, 'russia', '🇷🇺', 'ロシア')" role="button" tabindex="0">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-russia">確認中...</span>
+                            <div class="item-title"><span class="flag">🇷🇺</span><span class="name">ロシア</span></div>
+                        </div>
+                        <div class="item-meta"><span class="live-data" id="live-russia">--</span><span class="arrow">›</span></div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="accordion" open>
+                <summary class="section-title" role="button" tabindex="0">🌍 世界の地域</summary>
+                <div class="list-container">
+                    <div class="list-item" onclick="openDetail('china')" role="button" tabindex="0" data-target="china">
+                        <span class="pin-icon" data-id="china" onclick="togglePin(event, 'china', '🇨🇳', '中国')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-china">確認中...</span>
+                            <div class="item-title"><span class="flag">🇨🇳</span><span class="name">中国</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-china">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('korea')" role="button" tabindex="0" data-target="korea">
+                        <span class="pin-icon" data-id="korea" onclick="togglePin(event, 'korea', '🇰🇷', '韓国')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-korea">確認中...</span>
+                            <div class="item-title"><span class="flag">🇰🇷</span><span class="name">韓国</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-korea">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('sea')" role="button" tabindex="0" data-target="sea">
+                        <span class="pin-icon" data-id="sea" onclick="togglePin(event, 'sea', '🌏', '東南アジア')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-sea">確認中...</span>
+                            <div class="item-title"><span class="flag">🌏</span><span class="name">東南アジア</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-sea">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('oceania')" role="button" tabindex="0" data-target="oceania">
+                        <span class="pin-icon" data-id="oceania" onclick="togglePin(event, 'oceania', '🇦🇺', 'オセアニア')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-oceania">確認中...</span>
+                            <div class="item-title"><span class="flag">🇦🇺</span><span class="name">オセアニア</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-oceania">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('eu')" role="button" tabindex="0" data-target="eu">
+                        <span class="pin-icon" data-id="eu" onclick="togglePin(event, 'eu', '🇪🇺', 'ヨーロッパ')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-eu">確認中...</span>
+                            <div class="item-title"><span class="flag">🇪🇺</span><span class="name">ヨーロッパ</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-eu">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('africa')" role="button" tabindex="0" data-target="africa">
+                        <span class="pin-icon" data-id="africa" onclick="togglePin(event, 'africa', '🌍', 'アフリカ')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-africa">確認中...</span>
+                            <div class="item-title"><span class="flag">🌍</span><span class="name">アフリカ</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-africa">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('sa')" role="button" tabindex="0" data-target="sa">
+                        <span class="pin-icon" data-id="sa" onclick="togglePin(event, 'sa', '🌎', '南米')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-sa">確認中...</span>
+                            <div class="item-title"><span class="flag">🌎</span><span class="name">南米</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-sa">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                </div>
+            </details>
+
+            <details class="accordion" open>
+                <summary class="section-title" role="button" tabindex="0">🏛️ 国際機関</summary>
+                <div class="list-container">
+                    <div class="list-item" onclick="openDetail('un')" role="button" tabindex="0" data-target="un">
+                        <span class="pin-icon" data-id="un" onclick="togglePin(event, 'un', '🇺🇳', '国連 (UN)')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-un">確認中...</span>
+                            <div class="item-title"><span class="flag">🇺🇳</span><span class="name">国連 (UN)</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-un">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('nato')" role="button" tabindex="0" data-target="nato">
+                        <span class="pin-icon" data-id="nato" onclick="togglePin(event, 'nato', '🛡️', 'NATO')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-nato">確認中...</span>
+                            <div class="item-title"><span class="flag">🛡️</span><span class="name">NATO</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-nato">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                    <div class="list-item" onclick="openDetail('other_orgs')" role="button" tabindex="0" data-target="other_orgs">
+                        <span class="pin-icon" data-id="other_orgs" onclick="togglePin(event, 'other_orgs', '🌐', 'その他重要機関')" role="button" tabindex="0" aria-label="ピン留め">☆</span>
+                        <div class="item-body">
+                            <span class="update-date" id="date-other_orgs">確認中...</span>
+                            <div class="item-title"><span class="flag">🌐</span><span class="name">その他重要機関</span></div>
+                        </div>
+                        <div class="item-meta">
+                            <span class="live-data" id="live-other_orgs">--</span>
+                            <span class="arrow">›</span>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </section>
+    </main>
+
+    <main id="archive-view" class="view">
+        <div class="detail-header">
+            <button class="back-btn" onclick="closeArchiveView()" role="button" tabindex="0">← 戻る</button>
+            <h2>📂 情報アーカイブ倉庫</h2>
+        </div>
+        <div class="category-section" style="padding-top: 20px;">
+            <div class="list-container" id="archive-container">
+                </div>
+        </div>
+    </main>
+
+    <main id="detail-view" class="view">
+        <div class="detail-header">
+            <h2 id="detail-title" style="margin: 0;">タイトル</h2>
+            <button id="archive-btn" class="clip-btn" onclick="toggleArchive()" role="button" tabindex="0">📌 アーカイブ</button>
+        </div>
+        <div id="detail-content" class="detail-content"></div>
+
+        <button class="floating-bottom-btn" onclick="closeDetail()" role="button" tabindex="0">
+            <span class="icon">🔽</span> リストへ戻る
+        </button>
+    </main>
+    <div id="auth-modal" class="menu-overlay" style="display: none; opacity: 1; z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--surface-color); padding: 25px; border-radius: 8px; border: 1px solid var(--accent-color); width: 90%; max-width: 350px;" onclick="event.stopPropagation()">
+            <h3 style="color: var(--accent-color); margin-bottom: 15px; text-align: center;">GIB 認証システム</h3>
+            <input type="email" id="auth-email" placeholder="メールアドレス" style="width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: white;">
+            <input type="password" id="auth-password" placeholder="パスワード" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-color); color: white;">
+            <button onclick="handleAuth('login')" style="width: 100%; padding: 10px; background: var(--accent-color); color: #fff; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-bottom: 10px;">ログイン</button>
+            <button onclick="handleAuth('signup')" style="width: 100%; padding: 10px; background: transparent; color: var(--accent-color); border: 1px solid var(--accent-color); border-radius: 4px; font-weight: bold; cursor: pointer;">新規登録</button>
+            <div style="text-align: right; margin-top: 15px;"><button onclick="closeAuthModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer;">閉じる ×</button></div>
+        </div>
+    </div>
+
+    <div id="paywall-modal" class="menu-overlay" style="display: none; opacity: 1; z-index: 2000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--surface-color); padding: 25px; border-radius: 8px; border: 1px solid #e3b341; width: 90%; max-width: 400px; text-align: center;" onclick="event.stopPropagation()">
+            <h2 style="color: #e3b341; margin-bottom: 10px;">🔒 GIB プレミアム</h2>
+            <p id="paywall-message" style="color: var(--text-primary); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.5;">このインテリジェンスデータにアクセスするには、プランのアップグレードが必要です。</p>
+            
+            <div id="paywall-buttons" style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                <a href="#" id="btn-upgrade-standard" class="clip-btn" style="border-color: #58a6ff; color: #58a6ff; text-decoration: none; padding: 12px; font-weight: bold;">スタンダードプラン (¥450/月) に登録</a>
+                <a href="#" id="btn-upgrade-pro" class="clip-btn active" style="text-decoration: none; padding: 12px; font-weight: bold;">プロプラン (¥980/月) に登録</a>
+            </div>
+
+            <p id="msg-pro-tier" style="display: none; color: #e3b341; font-weight: bold; font-size: 1.1rem; margin-bottom: 20px;">あなたは最上級会員です！👑</p>
+            
+            <div id="paywall-login-prompt">
+                <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 15px;">※すでに加入済みの方はログインしてください。</p>
+                <button onclick="openAuthModal(); closePaywallModal();" style="background: none; border: 1px solid var(--text-secondary); color: var(--text-primary); padding: 8px 15px; border-radius: 4px; cursor: pointer;">ログイン画面へ</button>
+            </div>
+            
+            <div style="text-align: right; margin-top: 15px;"><button onclick="closePaywallModal()" style="background: none; border: none; color: var(--text-secondary); cursor: pointer;">閉じる ×</button></div>
+        </div>
+    </div>  
+
+    <div id="payment-loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-content">
+            <div class="cyber-spinner"></div>
+            <h3 class="loading-title">PAYMENT CONFIRMED</h3>
+            <p class="loading-text">決済を確認しました。<br>最新の権限情報を暗号化通信で取得中...</p>
+            <div class="progress-bar-container"><div class="progress-bar"></div></div>
+        </div>
+    </div>
+
+    <div id="custom-confirm-modal" class="menu-overlay" style="display: none; opacity: 1; z-index: 3000;">
+        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--surface-color); padding: 25px; border-radius: 8px; border: 1px solid var(--accent-color); width: 90%; max-width: 350px; text-align: center;">
+            <h3 style="color: #ff7b72; margin-bottom: 15px;">⚠️ 注目エリアの解除</h3>
+            <p id="confirm-dialog-msg" style="color: var(--text-primary); font-size: 0.95rem; margin-bottom: 25px; line-height: 1.5;"></p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button id="btn-confirm-cancel" style="padding: 10px 20px; background: transparent; color: var(--text-secondary); border: 1px solid var(--border-color); border-radius: 4px; cursor: pointer;">キャンセル</button>
+                <button id="btn-confirm-ok" style="padding: 10px 20px; background: transparent; color: #ff7b72; border: 1px solid #ff7b72; border-radius: 4px; font-weight: bold; cursor: pointer;">削除する</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

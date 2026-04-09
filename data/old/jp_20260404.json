@@ -1,0 +1,29 @@
+{
+  "factions": {
+    "jp": {
+      "display_name": "日本",
+      "matrices": {
+        "matrix_1": {
+          "title": "テスト",
+          "detail": "テスト"
+        },
+        "matrix_2": {
+          "title": "テスト",
+          "detail": "テスト"
+        },
+        "matrix_3": {
+          "title": "テスト",
+          "detail": "テスト"
+        },
+        "matrix_4": {
+          "title": "テスト",
+          "detail": "テスト"
+        },
+        "matrix_5": {
+          "title": "テスト",
+          "detail": "テスト"
+        }
+      }
+    }
+  }
+}

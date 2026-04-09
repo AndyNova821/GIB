@@ -1,0 +1,225 @@
+/* ==========================================
+   features.css: リスト、アコーディオン、詳細コンテンツ等
+   ========================================== */
+.category-section { padding: 0 20px 20px 20px; }
+.list-container { display: flex; flex-direction: column; gap: 8px; }
+
+.list-item {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: 12px 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
+    width: 100%;
+}
+.list-item:hover { background-color: rgba(88, 166, 255, 0.05); }
+.list-item:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: -2px;
+    background-color: rgba(88, 166, 255, 0.1);
+}
+
+.item-body { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+.item-title { display: flex; align-items: center; }
+.item-title .flag { font-size: 1.2rem; margin-right: 10px; }
+.item-title .name { font-size: 1rem; font-weight: 500; }
+.item-meta { display: flex; align-items: center; }
+
+.update-date { font-size: 0.65rem; margin-bottom: 2px; font-family: monospace; letter-spacing: 0.05em; }
+.update-date.is-today { color: var(--today-color); font-weight: bold; }
+.update-date.is-past { color: var(--text-primary); }
+.update-date.is-missing { color: var(--text-secondary); }
+
+.live-data { 
+    font-size: 0.8rem; color: var(--accent-color); margin-right: 12px; 
+    font-family: monospace; background-color: rgba(88, 166, 255, 0.1);
+    padding: 2px 6px; border-radius: 4px;
+}
+.list-item .arrow { color: var(--text-secondary); font-size: 1.2rem; }
+
+/* アイコン系 */
+.pin-icon { font-size: 1.2rem; color: var(--text-secondary); margin-right: 12px; cursor: pointer; transition: color 0.2s; user-select: none; }
+.pin-icon:hover, .pin-icon:focus-visible { color: #e3b341; outline: none; }
+.pin-icon.active { color: #e3b341; }
+
+.archive-icon { font-size: 1.1rem; color: var(--archive-color); margin-right: 12px; cursor: pointer; user-select: none; }
+.archive-icon:focus-visible { outline: 2px solid var(--archive-color); border-radius: 4px; }
+
+/* 特別セクション */
+.watchlist-section { padding: 0 20px 10px 20px; }
+.list-item.pinned { border-left: 4px solid var(--accent-color); }
+
+.archive-section { padding: 0 20px 10px 20px; }
+.list-item.archived { border-left: 4px solid var(--archive-color); }
+
+/* セクションタイトル・カレンダー・アコーディオン */
+.section-title {
+    font-size: 0.95rem; color: var(--text-secondary); margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-color); padding-bottom: 8px; padding-top: 15px;
+}
+
+.time-machine-section { padding: 15px 20px 5px 20px; display: flex; align-items: center; justify-content: space-between; }
+.date-label { font-size: 0.85rem; color: var(--text-secondary); }
+.date-picker {
+    background-color: var(--surface-color); border: 1px solid var(--border-color);
+    color: var(--accent-color); padding: 8px 12px; border-radius: 6px;
+    font-family: monospace; font-size: 0.9rem; cursor: pointer;
+}
+
+.accordion { padding: 0 20px; }
+.accordion summary { cursor: pointer; list-style: none; position: relative; }
+.accordion summary::-webkit-details-marker { display: none; }
+.accordion summary::after { content: '＋'; position: absolute; right: 0; color: var(--text-secondary); }
+.accordion[open] summary::after { content: '－'; }
+.accordion summary:focus-visible { outline: 2px solid var(--accent-color); border-radius: 4px; padding: 2px; }
+
+/* ボタン系 */
+.back-btn { background: none; border: none; color: var(--accent-color); font-size: 1rem; cursor: pointer; margin-right: 15px; }
+.back-btn:focus-visible { outline: 2px solid var(--accent-color); border-radius: 4px; }
+
+.clip-btn { 
+    background: none; 
+    border: 1px solid var(--text-secondary); 
+    color: var(--text-secondary); 
+    padding: 6px 12px; 
+    border-radius: 4px; 
+    font-size: 0.8rem; 
+    cursor: pointer; 
+    transition: 0.2s; 
+    white-space: nowrap;
+}
+.clip-btn.active { background-color: rgba(163, 113, 247, 0.15); border-color: var(--archive-color); color: var(--archive-color); }
+.clip-btn:focus-visible { outline: 2px solid var(--archive-color); outline-offset: 2px; }
+
+/* 詳細コンテンツ内 (Markdown出力部) */
+.detail-content {
+    padding: 20px 20px 100px 20px; 
+    line-height: 1.6;
+}
+.matrix-content { overflow-wrap: break-word; }
+.matrix-content h3 { 
+    color: var(--text-primary); 
+    margin-top: 35px;
+    margin-bottom: 18px;
+    font-size: 1.05rem; 
+    border-bottom: 1px solid var(--border-color); 
+    padding-bottom: 6px; 
+}
+.matrix-content h2 { 
+    margin-top: 40px; 
+    margin-bottom: 20px; 
+}
+.matrix-content p { margin-bottom: 15px; }
+.matrix-content ul { margin-left: 20px; margin-bottom: 15px; }
+.matrix-content li { margin-bottom: 8px; }
+.matrix-content strong { color: #ffffff; }
+
+.matrix-content table {
+    width: 100%; 
+    border-collapse: collapse; 
+    margin-top: 15px; 
+    margin-bottom: 20px;
+    font-size: 0.85rem; /* スマホで見やすく少し縮小 */
+    background-color: var(--surface-color);
+    display: table; /* blockからtableに戻して幅を維持 */
+    word-break: break-all; /* 単語の途中でも改行を許可 */
+}
+
+.matrix-content th, .matrix-content td { 
+    border: 1px solid var(--border-color); 
+    padding: 8px 6px; /* 余白を詰める */
+    text-align: left; 
+    white-space: normal; /* 折り返しを有効化 */
+    vertical-align: top;
+}
+
+.matrix-content th { 
+    background-color: rgba(88, 166, 255, 0.1); 
+    color: var(--accent-color); 
+    font-weight: bold; 
+}
+
+/* ==========================================
+   タイムマシン機能 UI拡張 (昨日・今日ボタン)
+   ========================================== */
+.time-machine-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* 左寄せ */
+    gap: 12px;
+    flex-wrap: wrap; /* スマホ等の狭い画面で折り返す用 */
+}
+
+.quick-date-btns {
+    display: flex;
+    gap: 8px;
+}
+
+.quick-btn {
+    background-color: var(--surface-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.quick-btn:hover {
+    border-color: var(--text-secondary);
+}
+
+.quick-btn.active {
+    background-color: rgba(88, 166, 255, 0.15);
+    border-color: var(--accent-color);
+    color: var(--accent-color);
+    font-weight: bold;
+}
+
+.quick-btn:focus-visible { 
+    outline: 2px solid var(--accent-color); 
+    outline-offset: 2px; 
+}
+
+
+/* ==========================================
+   今日の情勢トピック UI
+   ========================================== */
+.topic-panel {
+    background: linear-gradient(145deg, var(--surface-color), #1c2128);
+    border: 1px solid rgba(227, 179, 65, 0.5); /* ゴールド系のアクセント */
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 10px;
+    box-shadow: 0 4px 15px rgba(227, 179, 65, 0.05);
+}
+
+.topic-title {
+    color: #e3b341;
+    font-size: 1.05rem;
+    margin-bottom: 12px;
+    border-bottom: 1px dashed rgba(227, 179, 65, 0.3);
+    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+}
+
+.topic-content {
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* トピック内の余白調整 */
+.topic-content p { margin-bottom: 10px; }
+.topic-content p:last-child { margin-bottom: 0; }
+
+/* データ未取得時は国名と同じ白文字にする */
+.update-date.is-missing {
+    color: var(--text-primary);
+}

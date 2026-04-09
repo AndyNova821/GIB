@@ -1,0 +1,196 @@
+/* ==========================================
+   layout.css: ヘッダー、メニュー、モーダル、ビュー切り替え
+   ========================================== */
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background-color: rgba(13, 17, 23, 0.9);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+
+.logo-container { display: flex; flex-direction: column; }
+.logo-ja { font-size: 1.1rem; font-weight: bold; letter-spacing: 0.05em; }
+.logo-en { font-size: 0.65rem; color: var(--text-secondary); letter-spacing: 0.02em; }
+
+.menu-icon { font-size: 1.8rem; cursor: pointer; color: var(--text-secondary); }
+.menu-icon:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 4px; border-radius: 4px; }
+
+.view {
+    display: none;
+    width: 100%;
+    min-height: 100dvh; /* 100vh から 100dvh に変更 */
+    animation: fadeIn 0.25s ease-in-out;
+}
+.view.active { display: block; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateX(10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+/* メニュー・モーダル系 */
+.menu-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px);
+    z-index: 999; display: none; opacity: 0; transition: opacity 0.3s;
+}
+.menu-overlay.active { display: block; opacity: 1; }
+
+.side-menu {
+    position: fixed; top: 0; right: -300px; width: 280px; height: 100%;
+    background-color: var(--surface-color); border-left: 1px solid var(--border-color);
+    z-index: 1000; transition: right 0.3s ease-in-out; display: flex; flex-direction: column;
+}
+.side-menu.active { right: 0; }
+
+.menu-header {
+    padding: 20px; border-bottom: 1px solid var(--border-color);
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: bold; color: var(--accent-color);
+}
+.close-menu { font-size: 1.5rem; cursor: pointer; color: var(--text-secondary); }
+.close-menu:focus-visible { outline: 2px solid var(--accent-color); border-radius: 4px; }
+
+.menu-list { list-style: none; padding: 0; }
+.menu-list li {
+    padding: 16px 20px; border-bottom: 1px solid var(--border-color);
+    cursor: pointer; transition: background-color 0.2s;
+}
+.menu-list li:hover, .menu-list li:focus-visible { background-color: rgba(88, 166, 255, 0.1); outline: none; }
+
+.profile-modal {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100dvh;
+    background-color: var(--bg-color); z-index: 500;
+    overflow-y: auto; /* スマホで中身がはみ出た際にスクロールさせる */
+}
+
+/* 共通ヘッダー・フッター系UI */
+.detail-header {
+    display: flex;
+    justify-content: space-between; /* ★追加: タイトルとボタンを左右に離す */
+    align-items: center;
+    padding: 15px 20px;
+    background-color: var(--surface-color);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 60px;
+    z-index: 50;
+}
+
+.floating-bottom-btn {
+    position: fixed;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 85%;
+    max-width: 400px;
+    background-color: rgba(22, 27, 34, 0.95);
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 0.95rem;
+    font-weight: bold;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 10px rgba(88, 166, 255, 0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+}
+.floating-bottom-btn:active { transform: translateX(-50%) scale(0.98); }
+.floating-bottom-btn:focus-visible { outline: 3px solid #ffffff; outline-offset: 2px; }
+
+/* ==========================================
+   トースト通知 (Toast Notifications)
+   ========================================== */
+#toast-container {
+    position: fixed;
+    bottom: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none; /* クリックを裏の要素に貫通させる */
+}
+
+.gib-toast {
+    background: rgba(22, 27, 34, 0.95);
+    border-left: 4px solid var(--accent-color);
+    color: var(--text-primary);
+    padding: 12px 24px;
+    border-radius: 4px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    font-size: 0.95rem;
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: toastFadeIn 0.3s forwards, toastFadeOut 0.4s forwards 2s; /* 2秒後にフェードアウト開始 */
+}
+
+.gib-toast.success { border-color: var(--today-color); }
+.gib-toast.error { border-color: #ff7b72; }
+
+@keyframes toastFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastFadeOut {
+    to { opacity: 0; transform: translateY(-20px); }
+}
+
+
+/* ==========================================
+   ローディングオーバーレイ (決済完了時など)
+   ========================================== */
+.loading-overlay {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(13, 17, 23, 0.95); /* 背景色に合わせた暗幕 */
+    backdrop-filter: blur(8px); /* 後ろをぼかしてサイバー感を演出 */
+    z-index: 9999; 
+    display: flex; justify-content: center; align-items: center;
+    opacity: 0; transition: opacity 0.3s ease;
+}
+.loading-overlay.active { opacity: 1; }
+
+.loading-content {
+    text-align: center; max-width: 400px; padding: 30px;
+}
+
+.cyber-spinner {
+    width: 60px; height: 60px; margin: 0 auto 20px;
+    border: 4px solid var(--border-color);
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-title {
+    color: var(--accent-color); font-size: 1.2rem; letter-spacing: 0.1em; margin-bottom: 10px;
+}
+
+.loading-text {
+    color: var(--text-primary); font-size: 0.9rem; line-height: 1.6; margin-bottom: 20px;
+}
+
+.progress-bar-container {
+    width: 100%; height: 4px; background: var(--border-color); border-radius: 2px; overflow: hidden;
+}
+
+/* ちょうど3秒かけて満タンになるプログレスバー */
+.progress-bar {
+    width: 0%; height: 100%; background: var(--accent-color);
+    animation: progress 3s cubic-bezier(0.1, 0.7, 0.1, 1) forwards;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes progress { 0% { width: 0%; } 100% { width: 100%; } }
