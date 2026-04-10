@@ -105,23 +105,20 @@ export async function openDetail(targetId, specificDate = null) {
         const dateStr = AppState.CURRENT_VIEW_DATE;
         const formattedDate = `${dateStr.substring(0,4)}/${dateStr.substring(4,6)}/${dateStr.substring(6,8)}`;
 
-        if (AppState.CURRENT_VIEW_TARGET === 'all') {
-            titleEl.textContent = `${formattedDate} の世界情勢トピック`;
-            if (rawData.summary) {
-                const formattedText = marked.parse(rawData.summary);
-                htmlBuilder = `<div class="matrix-section"><div class="matrix-content">${formattedText}</div></div>`;
-            }
-        } else {
-            const targetData = rawData.factions ? rawData.factions[AppState.CURRENT_VIEW_TARGET] : null; 
-            titleEl.textContent = `${targetData.display_name} (${formattedDate})`;
-            const matrices = targetData.matrices;
-            if (matrices) {
-                Object.keys(matrices).sort().forEach(key => {
-                    const matrix = matrices[key];
-                    const formattedText = marked.parse(matrix.detail);
-                    htmlBuilder += `<div class="matrix-section"><h3 style="color:#58a6ff;">${matrix.title}</h3><div class="matrix-content">${formattedText}</div></div>`;
-                });
-            }
+        // ★ 'all'も含めて全て共通のレイアウト構築ロジックを使用する
+        const targetData = rawData.factions ? rawData.factions[AppState.CURRENT_VIEW_TARGET] : null; 
+        
+        if (!targetData) throw new Error('Data not found');
+
+        titleEl.textContent = `${targetData.display_name} (${formattedDate})`;
+        const matrices = targetData.matrices;
+        
+        if (matrices) {
+            Object.keys(matrices).sort().forEach(key => {
+                const matrix = matrices[key];
+                const formattedText = marked.parse(matrix.detail);
+                htmlBuilder += `<div class="matrix-section"><h3 style="color:#58a6ff;">${matrix.title}</h3><div class="matrix-content">${formattedText}</div></div>`;
+            });
         }
         contentEl.innerHTML = htmlBuilder;
         updateArchiveBtnState();

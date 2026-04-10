@@ -30,14 +30,9 @@ export async function updateDashboardUI() {
             const data = await response.json();
             let isValid = false;
 
-            // ★ データの実効性チェック
-            if (targetId === 'all') {
-                // 全体要約：summaryキーが存在し、かつ空文字でないか
-                isValid = !!(data && data.summary && data.summary.trim() !== "");
-            } else {
-                // 各地域：factions内にその地域のデータが存在するか
-                isValid = !!(data && data.factions && data.factions[targetId]);
-            }
+            // ★ データの実効性チェック（全ターゲット共通ルール）
+            // factions内にそのID（all含む）のデータが存在するかチェック
+            isValid = !!(data && data.factions && data.factions[targetId]);
 
             if (isValid) {
                 dateElements.forEach(el => {
