@@ -31,17 +31,17 @@ export async function openDetail(targetId, specificDate = null) {
     const isWithin7Days = (diffDays <= 7);
     const standardFactions = ['us', 'jp', 'israel', 'iran', 'ukraine', 'russia'];
 
-    if (userPlan === 'unregistered') {
-        // ① 未登録: 今日の「情勢トピック」のみ
-        if (targetId === 'all' && isToday) {
+if (userPlan === 'unregistered') {
+        // ① 未登録: 今日の「情勢トピック」「アメリカ」「イラン」「イスラエル」「韓国」のみ
+        if ((targetId === 'all' || targetId === 'us' || targetId === 'iran' || targetId === 'israel' || targetId === 'korea') && isToday) {
             isAllowed = true;
         } else {
             isAllowed = false;
-            denyReason = "このコンテンツへアクセスするには、無料の会員登録が必要です。";
+            denyReason = "過去のデータやその他の国・地域を閲覧するには、無料会員登録およびプランのアップグレードが必要です。";
         }
     } else if (userPlan === 'free') {
-        // ② フリー会員: 今日の「情勢トピック」「アメリカ」「イラン」のみ
-        if ((targetId === 'all' || targetId === 'us' || targetId === 'iran') && isToday) {
+        // ② フリー会員: 今日の「情勢トピック」「アメリカ」「イラン」「イスラエル」のみ
+        if ((targetId === 'all' || targetId === 'us' || targetId === 'iran' || targetId === 'israel' || targetId === 'korea' || targetId === 'ukraine' || targetId === 'russia' || targetId === 'jp') && isToday) {
             isAllowed = true;
         } else {
             isAllowed = false;

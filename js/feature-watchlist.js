@@ -33,8 +33,9 @@ export function updatePinIcons() {
     const userPlan = localStorage.getItem('gib_user_plan') || 'unregistered';
     
     // 各プランで閲覧を許可するIDの定義
-    const freeAllowed = ['all', 'us', 'iran'];
-    const standardAllowed = ['all', 'us', 'iran', 'jp', 'israel', 'ukraine', 'russia'];
+    const unregisteredAllowed = ['all', 'us', 'iran', 'israel', 'korea'];
+    const freeAllowed = ['all', 'us', 'iran', 'israel', 'korea', 'ukraine', 'russia', 'jp'];
+    const standardAllowed = ['all', 'us', 'iran', 'jp', 'israel', 'ukraine', 'russia', 'korea'];
 
     document.querySelectorAll('.original-list .list-item').forEach(listItem => {
         const icon = listItem.querySelector('.pin-icon');
@@ -46,7 +47,7 @@ export function updatePinIcons() {
 
         // 1. 閲覧権限の判定
         if (userPlan === 'unregistered') {
-            canRead = false; // 未登録は詳細を開けないため全て🔒対象
+            canRead = unregisteredAllowed.includes(id);
         } else if (userPlan === 'free') {
             canRead = freeAllowed.includes(id);
         } else if (userPlan === 'standard') {
