@@ -28,27 +28,28 @@ export async function openDetail(targetId, specificDate = null) {
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
     
     const isToday = (diffDays === 0);
+    const isYesterday = (diffDays === 1); // 昨日判定を追加
     const isWithin7Days = (diffDays <= 7);
-    const standardFactions = ['us', 'jp', 'israel', 'iran', 'ukraine', 'russia'];
+    const standardFactions = ['us', 'jp', 'israel', 'iran', 'ukraine', 'russia', 'korea']; // koreaを追加
 
-if (userPlan === 'unregistered') {
-        // ① 未登録: 今日の「情勢トピック」「アメリカ」「イラン」「イスラエル」「韓国」のみ
-        if ((targetId === 'all' || targetId === 'us' || targetId === 'iran' || targetId === 'israel' || targetId === 'korea') && isToday) {
+    if (userPlan === 'unregistered') {
+        // ① 未登録: 今日・昨日の「情勢トピック」「アメリカ」「イラン」「イスラエル」「韓国」のみ
+        if ((targetId === 'all' || targetId === 'us' || targetId === 'iran' || targetId === 'israel' || targetId === 'korea') && (isToday || isYesterday)) {
             isAllowed = true;
         } else {
             isAllowed = false;
-            denyReason = "過去のデータやその他の国・地域を閲覧するには、無料会員登録およびプランのアップグレードが必要です。";
+            denyReason = "過去のデータやその他の国・地域を閲覧するには、無料の会員登録およびプランのアップグレードが必要です。";
         }
     } else if (userPlan === 'free') {
-        // ② フリー会員: 今日の「情勢トピック」「アメリカ」「イラン」「イスラエル」のみ
-        if ((targetId === 'all' || targetId === 'us' || targetId === 'iran' || targetId === 'israel' || targetId === 'korea' || targetId === 'ukraine' || targetId === 'russia' || targetId === 'jp') && isToday) {
+        // ② フリー会員: 今日・昨日の「主要国トピック」「アメリカ」「イラン」「イスラエル」「韓国」「ウクライナ」「ロシア」「日本」のみ
+        if ((targetId === 'all' || targetId === 'us' || targetId === 'iran' || targetId === 'israel' || targetId === 'korea' || targetId === 'ukraine' || targetId === 'russia' || targetId === 'jp') && (isToday || isYesterday)) {
             isAllowed = true;
         } else {
             isAllowed = false;
             denyReason = "各国の詳細データや過去のアーカイブを閲覧するには「スタンダードプラン」以上の権限が必要です。";
         }
     } else if (userPlan === 'standard') {
-        // ③ スタンダード: 今日の「情勢トピック」および主要国の「今日〜過去7日」
+        // ③ スタンダード: 今日〜過去7日間の「情勢トピック」および主要国（昨日を含む）
         if (targetId === 'all') {
             isAllowed = isWithin7Days;
             if (!isAllowed) denyReason = "過去7日を超える情勢トピックの閲覧は「プロプラン」限定の機能です。";
@@ -65,7 +66,6 @@ if (userPlan === 'unregistered') {
     }
 
     if (!isAllowed) {
-        // 権限がない場合、状況に応じたペイウォール（または登録画面）を呼び出す
         openPaywallModal(denyReason, isLogged, userPlan);
         return; 
     }
@@ -105,7 +105,6 @@ if (userPlan === 'unregistered') {
         const dateStr = AppState.CURRENT_VIEW_DATE;
         const formattedDate = `${dateStr.substring(0,4)}/${dateStr.substring(4,6)}/${dateStr.substring(6,8)}`;
 
-        // ★ 'all'も含めて全て共通のレイアウト構築ロジックを使用する
         const targetData = rawData.factions ? rawData.factions[AppState.CURRENT_VIEW_TARGET] : null; 
         
         if (!targetData) throw new Error('Data not found');
@@ -221,7 +220,6 @@ export function closePaywallModal() {
     document.body.style.overflow = ''; 
 }
 export function openAuthModal() { 
-    // モーダルを開くたびに表示状態をリセットする
     const formContainer = document.getElementById('auth-form-container');
     const successMsg = document.getElementById('auth-success-msg');
     if (formContainer) formContainer.style.display = 'block';
@@ -255,8 +253,6 @@ export async function openAccountInfo() {
     const { data: { session } } = await supabase.auth.getSession();
     const userPlan = localStorage.getItem('gib_user_plan') || 'free';
     const contentEl = document.getElementById('account-info-content');
-    
-    // ★追加: カスタマーポータルへ飛ぶボタンを取得
     const portalBtn = document.getElementById('btn-customer-portal');
     
     if (session && contentEl) {
@@ -271,12 +267,10 @@ export async function openAccountInfo() {
             <p style="margin-bottom: 5px; color: var(--text-secondary); font-size: 0.9rem;">現在の権限レベル</p>
             <p style="font-weight: bold; font-size: 1.15rem; color: ${planColor};">${planDisplay}</p>
         `;
-        // ★追加: ログイン中ならポータルボタンを表示する
         if (portalBtn) portalBtn.style.display = 'block';
 
     } else if (contentEl) {
         contentEl.innerHTML = '<p style="color: #ff7b72;">ユーザー情報を取得できませんでした。再ログインしてください。</p>';
-        // ★追加: 未ログインなら隠す
         if (portalBtn) portalBtn.style.display = 'none';
     }
 
