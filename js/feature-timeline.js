@@ -1,5 +1,5 @@
-// js/feature-timeline.js
 import { AppState, TODAY, JST_TODAY, YESTERDAY, JST_YESTERDAY } from './core.js';
+import { updatePinIcons } from './feature-watchlist.js'; // ★追加
 
 export async function updateDashboardUI() {
     const isToday = (AppState.TARGET_DATE === TODAY);
@@ -7,53 +7,55 @@ export async function updateDashboardUI() {
     const formattedDate = `${t.substring(0,4)}/${t.substring(4,6)}/${t.substring(6,8)}`;
     const folderPath = isToday ? 'data' : 'data/old';
 
-    // HTMLに記述された data-target 属性を収集（allも含めて自動収集される）
     const itemElements = document.querySelectorAll('.original-list .list-item[data-target], #watchlist-container .list-item[data-target]');
     const targetIds = [...new Set(Array.from(itemElements).map(el => el.getAttribute('data-target')))];
 
-    // ★ 修正箇所：再取得の前に、古いステータス属性を完全に削除してリセットする
     targetIds.forEach(id => {
         document.querySelectorAll(`[data-target="${id}"]:not(.archived) .update-date`).forEach(el => {
             el.textContent = "確認中...";
             el.className = "update-date is-past";
-            delete el.dataset.status; // ★ データ属性を削除してリセット
+            el.style.color = ""; // リセット
+            delete el.dataset.status;
         });
     });
+
+    // ★重要: 日付が変わるたびに権限（鍵マーク）を再計算する
+    updatePinIcons();
 
     await Promise.all(targetIds.map(async (targetId) => {
         const dateElements = document.querySelectorAll(`[data-target="${targetId}"]:not(.archived) .update-date`);
         try {
-            // ★ HEADではなくGETで中身を取得するように変更
             const response = await fetch(`${folderPath}/${targetId}_${AppState.TARGET_DATE}.json`);
             if (!response.ok) throw new Error('Not Found');
 
             const data = await response.json();
-            let isValid = false;
-
-            // ★ データの実効性チェック（全ターゲット共通ルール）
-            // factions内にそのID（all含む）のデータが存在するかチェック
-            isValid = !!(data && data.factions && data.factions[targetId]);
+            let isValid = !!(data && data.factions && data.factions[targetId]);
 
             if (isValid) {
                 dateElements.forEach(el => {
                     el.textContent = `更新: ${formattedDate}`;
-                    el.className = isToday ? "update-date is-today" : "update-date is-past";
+                    if (isToday) {
+                        el.className = "update-date is-today";
+                        el.style.color = ""; // 今日はデフォルト（白/グレー）
+                    } else {
+                        el.className = "update-date is-past";
+                        el.style.color = "#2fb344"; // ★過去日でデータがある場合は緑文字
+                    }
                     delete el.dataset.status;
                 });
             } else {
-                // ファイルはあっても中身が空ならエラー扱いにする
                 throw new Error('Empty Content');
             }
         } catch (error) {
             dateElements.forEach(el => {
                 el.textContent = "データ未取得";
                 el.className = "update-date is-missing";
-                el.dataset.status = "missing"; // ★ これにより詳細画面への遷移がブロックされます
+                el.style.color = ""; // ★データ未取得時は白のまま
+                el.dataset.status = "missing";
             });
         }
     }));
 
-// ★ ALLのリスト名テキストを動的に変更（🌍アイコンを保持して確実に書き換える）
     const allFactionNameEl = document.querySelector('[data-target="all"] .faction-name');
     if (allFactionNameEl) {
         if (AppState.TARGET_DATE === TODAY) {

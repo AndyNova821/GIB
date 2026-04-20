@@ -1,6 +1,8 @@
-// js/feature-watchlist.js
+// js/feature-watchlist.js 全文
+
 import { updateDashboardUI } from './feature-timeline.js';
 import { syncPreferencesToCloud } from './supabase-auth.js';
+import { AppState } from './core.js'; // ★追加
 
 let watchlist = JSON.parse(localStorage.getItem('gib_watchlist')) || [];
 
@@ -28,10 +30,26 @@ export function renderWatchlist() {
     });
 }
 
-// ★ 閲覧権限と注目エリア登録権限を完全に分離したアイコン更新ロジック
+// ★ 日付とプランを考慮して鍵マークを動的に更新する
 export function updatePinIcons() {
     const userPlan = localStorage.getItem('gib_user_plan') || 'unregistered';
     
+    // --- 日付計算ロジック (feature-detail.jsと共通) ---
+    const requestedDate = AppState.TARGET_DATE;
+    const reqYear = parseInt(requestedDate.substring(0,4));
+    const reqMonth = parseInt(requestedDate.substring(4,6)) - 1;
+    const reqDay = parseInt(requestedDate.substring(6,8));
+    const reqDateObj = new Date(reqYear, reqMonth, reqDay);
+    const todayObj = new Date();
+    todayObj.setHours(0,0,0,0);
+    reqDateObj.setHours(0,0,0,0);
+    const diffTime = Math.abs(todayObj - reqDateObj);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+    const isToday = (diffDays === 0);
+    const isYesterday = (diffDays === 1);
+    const isWithin7Days = (diffDays <= 7);
+    // ----------------------------------------------
+
     // 各プランで閲覧を許可するIDの定義
     const unregisteredAllowed = ['all', 'us', 'iran', 'israel', 'korea'];
     const freeAllowed = ['all', 'us', 'iran', 'israel', 'korea', 'ukraine', 'russia', 'jp'];
@@ -41,41 +59,44 @@ export function updatePinIcons() {
         const icon = listItem.querySelector('.pin-icon');
         if (!icon) return;
         const id = icon.getAttribute('data-id');
-        if (!id) return; // 'all' などピン留め対象外の項目はスキップ
+        if (!id) return;
 
         let canRead = false;
 
-        // 1. 閲覧権限の判定
+        // 閲覧権限の判定（日付条件を追加）
         if (userPlan === 'unregistered') {
-            canRead = unregisteredAllowed.includes(id);
+            canRead = unregisteredAllowed.includes(id) && (isToday || isYesterday);
         } else if (userPlan === 'free') {
-            canRead = freeAllowed.includes(id);
+            canRead = freeAllowed.includes(id) && (isToday || isYesterday);
         } else if (userPlan === 'standard') {
-            canRead = standardAllowed.includes(id);
+            if (id === 'all' || standardAllowed.includes(id)) {
+                canRead = isWithin7Days;
+            } else {
+                canRead = false; // 地域・国際機関はスタンダードでも不可
+            }
         } else if (userPlan === 'pro') {
-            canRead = true;
+            canRead = true; // Proは何日前でもOK
         }
 
-        // 2. アイコンの描画とクリックイベントのバインド
         if (!canRead) {
-            // 【閲覧権限なし】 -> 🔒を表示し、ペイウォールへ
+            // 【権限なし】 -> 🔒を表示
             icon.textContent = '🔒';
             icon.classList.remove('active');
             icon.style.color = 'var(--text-secondary)';
             
             icon.onclick = (e) => {
                 e.stopPropagation();
-                let msg = "この地域のデータ閲覧は「スタンダードプラン」以上の権限が必要です。";
+                let msg = "このデータの閲覧は「スタンダードプラン」以上の権限が必要です。";
                 if (userPlan === 'standard') {
-                    msg = "地域・国際機関のデータ閲覧は「プロプラン」限定の機能です。";
+                    msg = "地域・国際機関または過去7日を超えるアーカイブの閲覧は「プロプラン」限定の機能です。";
                 } else if (userPlan === 'unregistered') {
                     msg = "このコンテンツへアクセスするには、無料の会員登録が必要です。";
                 }
                 if(window.openPaywallModal) window.openPaywallModal(msg);
             };
         } else {
-            // 【閲覧権限あり】 -> ☆ または ★ を表示
-            icon.style.color = ''; // 🔒のグレースタイルをリセット
+            // 【権限あり】 -> ☆ または ★
+            icon.style.color = ''; 
             
             if (watchlist.some(item => item.id === id)) {
                 icon.textContent = '★'; 
@@ -85,7 +106,6 @@ export function updatePinIcons() {
                 icon.classList.remove('active');
             }
 
-            // クリックイベント：Proプラン未満はペイウォール、Proはピン留め処理を実行
             icon.onclick = (e) => {
                 e.stopPropagation();
                 if (userPlan !== 'pro') {
@@ -124,8 +144,6 @@ function showCustomConfirm(message) {
 
 export async function togglePin(event, id, flag, name) {
     event.stopPropagation(); 
-    
-    // システムの堅牢化：直接関数を呼ばれた場合でもプロプラン以外は弾く
     const userPlan = localStorage.getItem('gib_user_plan') || 'unregistered';
     if (userPlan !== 'pro') {
         if(window.openPaywallModal) window.openPaywallModal("📌 注目エリア保存機能は「プロプラン」限定の機能です。");
